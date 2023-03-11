@@ -4,53 +4,53 @@
     "parameters": {
         "location": {
             "type": "string",
-			"value": "eastus"
+			"defaultValue": "eastus"
         },
         "extendedLocation": {
             "type": "object",
-			"value": {}
+			"defaultValue": {}
         },
         "virtualNetworkName": {
             "type": "string",
-			"value": "azure-vnet-arm"
+			"defaultValue": "azure-vnet-arm"
         },
         "resourceGroup": {
             "type": "string",
-			"value": "NetworkWatcherRG"
+			"defaultValue": "NetworkWatcherRG"
         },
         "addressSpaces": {
             "type": "array",
-			"value": [
+			"defaultValue": [
                 "10.1.0.0/16"
             ]
         },
         "ipv6Enabled": {
             "type": "bool",
-			"value": false
+			"defaultValue": false
         },
         "subnetCount": {
             "type": "int",
-			"value": 1
+			"defaultValue": 1
         },
         "subnet0_name": {
             "type": "string",
-			"value": "default"
+			"defaultValue": "default"
         },
         "subnet0_addressRange": {
             "type": "string",
-			"value": "10.1.0.0/24"
+			"defaultValue": "10.1.0.0/24"
         },
         "ddosProtectionPlanEnabled": {
             "type": "bool",
-			"value": false
+			"defaultValue": false
         },
         "firewallEnabled": {
             "type": "bool",
-			"value": false
+			"defaultValue": false
         },
         "bastionEnabled": {
             "type": "bool",
-			"value": false
+			"defaultValue": false
         }
     },
     "variables": {},

@@ -1,0 +1,71 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+			"defaultValue": "globellb"
+        },
+        "location": {
+            "type": "string",
+			"defaultValue": "eastus"
+        },
+        "sku": {
+            "type": "string",
+			"defaultValue": "Standard"
+        },
+        "tier": {
+            "type": "string",
+			"defaultValue": "Global"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2021-05-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "Microsoft.Network/publicIPAddresses/publicip"
+            ],
+            "tags": {},
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "ipv4",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "/subscriptions/aeec0a1c-0f36-4c16-b96c-dc6dc14b8a61/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/publicIPAddresses/publicip"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [],
+                "probes": [],
+                "loadBalancingRules": [],
+                "inboundNatRules": [],
+                "outboundRules": []
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            }
+        },
+        {
+            "apiVersion": "2020-08-01",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "publicip",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            }
+        }
+    ]
+}

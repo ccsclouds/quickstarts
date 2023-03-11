@@ -14,8 +14,7 @@
 			"defaultValue": "eastus",
             "metadata": {
                 "description": "Location for all resources. Defaults to the resource group location."
-            },
-            "defaultValue": "[resourceGroup().location]"
+            }
         },
         "storageType": {
             "type": "string",

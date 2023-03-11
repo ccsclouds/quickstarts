@@ -1,0 +1,268 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apiVersion": {
+            "type": "string",
+            "defaultValue": "2021-05-01"
+        },
+        "administratorLogin": {
+            "type": "string",
+			"defaultValue": "CCSDemo"
+        },
+        "administratorLoginPassword": {
+            "type": "securestring",
+			"defaultValue": "Demo@12345"
+        },
+        "location": {
+            "type": "string",
+			"defaultValue": "eastus"
+        },
+        "serverName": {
+            "type": "string",
+			"defaultValue": "mysqldatabasearm"
+        },
+        "serverEdition": {
+            "type": "string",
+			"defaultValue": "Burstable"
+        },
+        "vCores": {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "storageSizeGB": {
+            "type": "int",
+			"defaultValue": 20
+        },
+        "haEnabled": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "availabilityZone": {
+            "type": "string",
+			"defaultValue": ""
+        },
+        "standbyAvailabilityZone": {
+            "type": "string",
+			"defaultValue": ""
+        },
+        "version": {
+            "type": "string",
+			"defaultValue": "5.7"
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "firewallRules": {
+            "type": "object",
+			"defaultValue": {
+                "rules": []
+            }
+        },
+        "backupRetentionDays": {
+            "type": "int",
+			"defaultValue": 7
+        },
+        "geoRedundantBackup": {
+            "type": "string",
+			"defaultValue": "Disabled"
+        },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "Standard_B1ms"
+        },
+        "storageIops": {
+            "type": "int",
+			"defaultValue": 360
+        },
+        "storageAutogrow": {
+            "type": "string",
+            "defaultValue": "Enabled"
+        },
+        "autoIoScaling": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "vnetData": {
+            "type": "object",
+            "metadata": {
+                "description": "Vnet data is an object which contains all parameters pertaining to vnet and subnet"
+            },
+            "defaultValue": {
+                "virtualNetworkName": "testVnet",
+                "subnetName": "testSubnet",
+                "virtualNetworkAddressPrefix": "10.0.0.0/16",
+                "virtualNetworkResourceGroupName": "[resourceGroup().name]",
+                "location": "eastus2",
+                "subscriptionId": "[subscription().subscriptionId]",
+                "subnetProperties": {},
+                "isNewVnet": false,
+                "subnetNeedsUpdate": false,
+                "Network": {}
+            }
+        },
+        "identityData": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "dataEncryptionData": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "serverParameters": {
+            "type": "array",
+            "defaultValue": []
+        },
+        "aadEnabled": {
+            "type": "bool",
+            "defaultValue": false
+        },
+        "aadData": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "guid": {
+            "type": "string",
+            "defaultValue": "f594adf2f2174c458f355db2374fa463"
+        }
+    },
+    "variables": {
+        "api": "[parameters('apiVersion')]",
+        "firewallRules": "[parameters('firewallRules').rules]",
+        "serverParameters": "[parameters('serverParameters')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('api')]",
+            "location": "[parameters('location')]",
+            "name": "[parameters('serverName')]",
+            "identity": "[if(empty(parameters('identityData')), json('null'), parameters('identityData'))]",
+            "properties": {
+                "version": "[parameters('version')]",
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "Network": "[if(empty(parameters('vnetData').Network), json('null'), parameters('vnetData').Network)]",
+                "Storage": {
+                    "StorageSizeGB": "[parameters('storageSizeGB')]",
+                    "Iops": "[parameters('storageIops')]",
+                    "Autogrow": "[parameters('storageAutogrow')]",
+                    "AutoIoScaling": "[parameters('autoIoScaling')]"
+                },
+                "Backup": {
+                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                    "geoRedundantBackup": "[parameters('geoRedundantBackup')]"
+                },
+                "availabilityZone": "[parameters('availabilityZone')]",
+                "highAvailability": {
+                    "mode": "[parameters('haEnabled')]",
+                    "standbyAvailabilityZone": "[parameters('standbyAvailabilityZone')]"
+                },
+                "dataencryption": "[if(empty(parameters('dataEncryptionData')), json('null'), parameters('dataEncryptionData'))]"
+            },
+            "sku": {
+                "name": "[parameters('vmName')]",
+                "tier": "[parameters('serverEdition')]",
+                "capacity": "[parameters('vCores')]"
+            },
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.DBforMySQL/flexibleServers"
+        },
+        {
+            "condition": "[greater(length(variables('firewallRules')), 0)]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "name": "[concat('firewallRules-', copyIndex())]",
+            "copy": {
+                "count": "[if(greater(length(variables('firewallRules')), 0), length(variables('firewallRules')), 1)]",
+                "mode": "Serial",
+                "name": "firewallRulesIterator"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.DBforMySQL/flexibleServers/', parameters('serverName'))]",
+                "Microsoft.Resources/deployments/addAdmins"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
+                            "name": "[concat(parameters('serverName'),'/',variables('firewallRules')[copyIndex()].name)]",
+                            "apiVersion": "[variables('api')]",
+                            "properties": {
+                                "StartIpAddress": "[variables('firewallRules')[copyIndex()].startIPAddress]",
+                                "EndIpAddress": "[variables('firewallRules')[copyIndex()].endIPAddress]"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[parameters('aadEnabled')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "name": "addAdmins",
+            "dependsOn": [
+                "[concat('Microsoft.DBforMySQL/flexibleServers/', parameters('serverName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.DBforMySQL/flexibleServers/administrators",
+                            "name": "[concat(parameters('serverName'),'/ActiveDirectory')]",
+                            "apiVersion": "[variables('api')]",
+                            "properties": {
+                                "administratorType": "[parameters('aadData').administratorType]",
+                                "identityResourceId": "[parameters('aadData').identityResourceId]",
+                                "login": "[parameters('aadData').login]",
+                                "sid": "[parameters('aadData').sid]",
+                                "tenantId": "[parameters('aadData').tenantId]"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[and(greater(length(variables('serverParameters')), 0), parameters('aadEnabled'))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "copy": {
+                "count": "[if(greater(length(variables('serverParameters')), 0), length(variables('serverParameters')), 1)]",
+                "mode": "serial",
+                "name": "serverParametersIterator"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.DBforMySQL/flexibleServers/', parameters('serverName'))]",
+                "Microsoft.Resources/deployments/addAdmins"
+            ],
+            "name": "[concat('serverParameters-', copyIndex(), '-', parameters('guid'))]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.DBforMySQL/flexibleServers/configurations",
+                            "name": "[concat(parameters('serverName'),'/',variables('serverParameters')[copyIndex()].name)]",
+                            "apiVersion": "[variables('api')]",
+                            "properties": {
+                                "value": "[variables('serverParameters')[copyIndex()].value]",
+                                "source": "[variables('serverParameters')[copyIndex()].source]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

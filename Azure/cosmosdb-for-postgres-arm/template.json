@@ -12,7 +12,7 @@
         },
         "administratorLoginPassword": {
             "type": "secureString",
-			"defaultValue": null
+			"defaultValue": "Demo@12345"
         },
         "previewFeatures": {
             "type": "bool",

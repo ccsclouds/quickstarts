@@ -1,0 +1,84 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "value": "eastus"
+        },
+        "extendedLocation": {
+            "type": "object",
+            "value": {}
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "value": "azure-vnet-arm"
+        },
+        "resourceGroup": {
+            "type": "string",
+            "value": "NetworkWatcherRG"
+        },
+        "addressSpaces": {
+            "type": "array",
+            "value": [
+                "10.1.0.0/16"
+            ]
+        },
+        "ipv6Enabled": {
+            "type": "bool",
+            "value": false
+        },
+        "subnetCount": {
+            "type": "int",
+            "value": 1
+        },
+        "subnet0_name": {
+            "type": "string",
+            "value": "default"
+        },
+        "subnet0_addressRange": {
+            "type": "string",
+            "value": "10.1.0.0/24"
+        },
+        "ddosProtectionPlanEnabled": {
+            "type": "bool",
+            "value": false
+        },
+        "firewallEnabled": {
+            "type": "bool",
+            "value": false
+        },
+        "bastionEnabled": {
+            "type": "bool",
+            "value": false
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('virtualNetworkName')]",
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2021-01-01",
+            "location": "[parameters('location')]",
+            "extendedLocation": "[if(empty(parameters('extendedLocation')), json('null'), parameters('extendedLocation'))]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.1.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.1.0.0/24"
+                        }
+                    }
+                ],
+                "enableDdosProtection": "[parameters('ddosProtectionPlanEnabled')]"
+            }
+        }
+    ]
+}

@@ -4,14 +4,14 @@
     "parameters": {
         "location": {
             "type": "string",
-			"defaultValue": "qatarcentral"
+			 "defaultValue": "qatarcentral"
         },
         "networkInterfaceName": {
             "type": "string",
-			"defaultValue": "arm-wind901"
+			 "defaultValue": "arm-wind901"
         },
         "enableAcceleratedNetworking": {
-            "type": "bool"
+            "type": "bool",
 			"defaultValue": true
         },
         "networkSecurityGroupName": {
@@ -38,7 +38,7 @@
         },
         "subnetName": {
             "type": "string",
-			"defaultValue": "default"
+			 "defaultValue": "default"
         },
         "virtualNetworkName": {
             "type": "string",
@@ -46,7 +46,7 @@
         },
         "addressPrefixes": {
             "type": "array",
-			"defaultValue": [
+			 "defaultValue": [
                 "10.1.0.0/16"
             ]
         },
@@ -107,7 +107,7 @@
         },
         "adminUsername": {
             "type": "string",
-			"defaultValue": "CCSDemo"
+			"defaultValue": "Demo"
         },
         "adminPassword": {
             "type": "secureString",
